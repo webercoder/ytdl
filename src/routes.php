@@ -1,10 +1,11 @@
 <?php
 // Routes
 
-$app->get('/[{name}]', function ($request, $response, $args) {
-    // Sample log message
-    $this->logger->info("Slim-Skeleton '/' route");
+$app->get('/', function($request, $response, $args) {
+    return $this->renderer->render($response, 'index.phtml', $args);
+});
 
-    // Render index view
+$app->post('/url', function($request, $response, $args) {
+    $this->logger->info("Requested ".var_export($args));
     return $this->renderer->render($response, 'index.phtml', $args);
 });
