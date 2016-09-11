@@ -5,7 +5,28 @@ $app->get('/', function($request, $response, $args) {
     return $this->renderer->render($response, 'index.phtml', $args);
 });
 
-$app->post('/url', function($request, $response, $args) {
-    $this->logger->info("Requested ".var_export($args));
-    return $this->renderer->render($response, 'index.phtml', $args);
+$app->post('/', function($request, $response, $args) {
+    $ip = $_SERVER['REMOTE_ADDR'];
+    $data = $request->getParsedBody();
+    $url = filter_var($data['url'], FILTER_SANITIZE_STRING);
+    $this->logger->info("{$ip} is requesting {$url}");
+
+    if (preg_match('/v=([A-Za-z0-9\-\_]+)/', $url, $matches) && strlen($matches[1]) > 0) {
+        $filename = $matches[1];
+        $downloadDir = dirname(__FILE__).'/../public/download';
+        $outputFormat = "{$downloadDir}/{$filename}.%(ext)s";
+        $cmd = "/usr/local/bin/youtube-dl -o '{$outputFormat}' --cache-dir '{$downloadDir}' --ffmpeg-location '/usr/local/bin' --extract-audio --audio-format mp3 'https://www.youtube.com/watch?v={$filename}' 2>&1";
+        $this->logger->info("Running command '{$cmd}'");
+        $output = `$cmd`;
+
+        $this->logger->info("Result of command: {$output}");
+
+        return $this->renderer->render($response, 'download.phtml', array(
+            'file' => "$filename.mp3"
+        ));
+    } else {
+        return $this->renderer->render($response, 'error.phtml', array(
+            'message' => "I don't know how to work with the URL, {$url}. Please provide a URL of the format, https://www.youtube.com/watch?v=id-here."
+        ));
+    }
 });
