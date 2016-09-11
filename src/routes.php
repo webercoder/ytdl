@@ -15,7 +15,7 @@ $app->post('/', function($request, $response, $args) {
         $filename = $matches[1];
         $downloadDir = dirname(__FILE__).'/../public/download';
         $outputFormat = "{$downloadDir}/{$filename}.%(ext)s";
-        $cmd = "youtube-dl -o '{$outputFormat}' --cache-dir '{$downloadDir}' --extract-audio --audio-format mp3 'https://www.youtube.com/watch?v={$filename}' 2>&1";
+        $cmd = "youtube-dl -o '{$outputFormat}' --no-mtime --cache-dir '{$downloadDir}' --extract-audio --audio-format mp3 'https://www.youtube.com/watch?v={$filename}' 2>&1";
         $this->logger->info("Running command '{$cmd}'");
         $output = `$cmd`;
 
